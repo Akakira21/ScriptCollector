@@ -1,0 +1,13 @@
+.layoutCenterFooter{
+    background-image: url(../assets/Images/PapierBG.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+}
+
+.main{
+    padding: 3%;
+    border-left: 50px solid rgba($color: #3a3a3a, $alpha: 0.5);
+    border-right: 50px solid rgba($color: #3a3a3a, $alpha: 0.5);
+    min-height: 100vh;
+}

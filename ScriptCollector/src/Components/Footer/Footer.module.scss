@@ -1,0 +1,22 @@
+.footer{
+    display: flex;
+    flex-flow: row;
+    justify-content: space-around;
+    background-color: rgba($color: #3a3a3a, $alpha: 0.5);
+    padding: 2%;
+}
+
+.button{
+    background-image: url(../../assets/Images/PlanchesVertical.jpg);
+    text-transform: none;
+    color: white;
+    padding-top: 1%;
+    padding-bottom: 1%;
+    padding-left: 3%;
+    padding-right: 3%;
+    border-radius: 500px;
+}
+
+.button:hover{
+    opacity: 0.5;
+}
