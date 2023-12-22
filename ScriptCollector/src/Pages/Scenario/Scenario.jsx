@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom'; // Import Link
 import styles from './Scenario.module.scss';
 
 const Scenario = () => {
@@ -36,7 +36,9 @@ const Scenario = () => {
               .map(tag => tag.trim())
               .filter(tag => tag.length > 0)
               .map((tag, index) => (
-                <li key={index}>{tag}</li>
+                <li key={index}>
+                  <Link to={`/scenarioscategories/${tag}`}>{tag}</Link>
+                </li>
             ))}
           </ul>
         </>

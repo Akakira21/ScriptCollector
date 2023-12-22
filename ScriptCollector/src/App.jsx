@@ -76,9 +76,9 @@ function App() {
           errorElement: <Error/>,
         },
         {
-          path: "/jeuxcategories",
-          element: <JeuxCategories/>,
-          errorElement: <Error/>,
+          path: "/jeuxcategories/:tag",
+          element: <JeuxCategories />,
+          errorElement: <Error />,
         },
         {
           path: "/scenario/:scenarioId",
@@ -136,9 +136,9 @@ function App() {
           errorElement: <Error/>,
         },
         {
-          path: "/scenarioscategories",
-          element: <ScenariosCategories/>,
-          errorElement: <Error/>,
+        path: "/scenarioscategories/:tag",
+        element: <ScenariosCategories />,
+        errorElement: <Error />,
         },
         {
           path: "/utilisationia",

@@ -143,7 +143,7 @@ app.get("/getScenarioById/:scenarioId", (req, res) => {
   connection.query(sqlGetScenario, [scenarioId], (err, result) => {
     if (err) {
       console.error(err);
-      res.status(500).json({ message: "Erreur serveur interne" });
+      res.status(500).json({ message: "Internal server error" });
       return;
     }
 
@@ -152,5 +152,88 @@ app.get("/getScenarioById/:scenarioId", (req, res) => {
     } else {
       res.status(404).json({ message: "Scénario non trouvé" });
     }
+  });
+});
+
+app.get("/getAllGameTags", (req, res) => {
+  const sqlGetAllTags = "SELECT CategorieJeu FROM jeux";
+
+  connection.query(sqlGetAllTags, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
+
+    const allTags = result
+      .flatMap(row => row.CategorieJeu.split(','))
+      .map(tag => tag.trim())
+      .filter(tag => tag)
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    res.status(200).json(allTags);
+  });
+});
+
+app.get("/getAllScenarioTags", (req, res) => {
+  const sqlGetAllTags = "SELECT CategorieScenario FROM scenarios";
+
+  connection.query(sqlGetAllTags, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
+
+    const allTags = result
+      .flatMap(row => row.CategorieScenario ? row.CategorieScenario.split(',') : [])
+      .map(tag => tag.trim())
+      .filter(tag => tag)
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    res.status(200).json(allTags);
+  });
+});
+
+app.get("/getGamesByTag/:tag", (req, res) => {
+  const tag = req.params.tag;
+  const sql = "SELECT * FROM jeux WHERE FIND_IN_SET(?, CategorieJeu) > 0";
+
+  connection.query(sql, [tag], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
+    res.status(200).json(result);
+  });
+});
+
+app.get("/getAllScenarios", (req, res) => {
+  const sqlGetAllScenarios = "SELECT * FROM scenarios";
+
+  connection.query(sqlGetAllScenarios, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
+
+    res.status(200).json(result);
+  });
+});
+
+app.get("/getScenariosByTag/:tag", (req, res) => {
+  const tag = req.params.tag;
+  const sqlGetScenariosByTag = "SELECT * FROM scenarios WHERE FIND_IN_SET(?, CategorieScenario) > 0";
+
+  connection.query(sqlGetScenariosByTag, [tag], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
+
+    res.status(200).json(result);
   });
 });

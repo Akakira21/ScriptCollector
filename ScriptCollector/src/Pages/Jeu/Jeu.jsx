@@ -51,7 +51,9 @@ const Jeu = () => {
               .map(tag => tag.trim())
               .filter(tag => tag.length > 0)
               .map((tag, index) => (
-                <li key={index}>{tag}</li>
+                <li key={index}>
+                  <Link to={`/jeuxcategories/${tag.toLowerCase()}`}>{tag}</Link>
+                </li>
             ))}
           </ul>
           <h3>Scénarios:</h3>
