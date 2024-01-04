@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import styles from './Jeu.module.scss';
 
 const Jeu = () => {
   const { gameId } = useParams();
@@ -40,35 +41,39 @@ const Jeu = () => {
   }, [gameId]);
 
   return (
-    <div>
-      {jeu ? (
-        <>
-          <h1>{jeu.NomJeu}</h1>
-          <h2>{jeu.DescJeu}</h2>
-          <h3>Tags:</h3>
-          <ul>
-            {jeu.CategorieJeu.split(',')
-              .map(tag => tag.trim())
-              .filter(tag => tag.length > 0)
-              .map((tag, index) => (
-                <li key={index}>
-                  <Link to={`/jeuxcategories/${tag.toLowerCase()}`}>{tag}</Link>
-                </li>
-            ))}
-          </ul>
-          <h3>Scénarios:</h3>
-          <ul>
-            {scenarios.map((scenario, index) => (
-              <li key={index}>
-                <Link to={`/scenario/${scenario.idScenario}`}>{scenario.NomScenario}</Link>
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : (
-        <p>Chargement...</p>
-      )}
-    </div>
+    <div className={styles.Jeu}>
+  {jeu ? (
+    <>
+      <h1>{jeu.NomJeu}</h1>
+      <h2>{jeu.DescJeu}</h2>
+      <h3>Tags:</h3>
+      <ul className={styles.tags_list}>
+        {jeu.CategorieJeu.split(',')
+          .map(tag => tag.trim())
+          .filter(tag => tag.length > 0)
+          .map((tag, index) => (
+            <li key={index}>
+              <Link to={`/jeuxcategories/${tag.toLowerCase()}`}>
+                <div>{tag}</div>
+              </Link>
+            </li>
+        ))}
+      </ul>
+      <h3>Scénarios:</h3>
+      <ul className={styles.scenarios_list}>
+        {scenarios.map((scenario, index) => (
+          <li key={index}>
+            <Link to={`/scenario/${scenario.idScenario}`}>
+              <div>{scenario.NomScenario}</div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </>
+  ) : (
+    <p>Chargement...</p>
+  )}
+</div>
   );
 };
 

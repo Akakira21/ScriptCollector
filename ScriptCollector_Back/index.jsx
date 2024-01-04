@@ -138,7 +138,11 @@ app.get("/getScenariosByGameId/:gameId", (req, res) => {
 
 app.get("/getScenarioById/:scenarioId", (req, res) => {
   const scenarioId = req.params.scenarioId;
-  const sqlGetScenario = "SELECT * FROM scenarios WHERE idScenario = ?";
+  const sqlGetScenario = `
+    SELECT scenarios.*, jeux.NomJeu 
+    FROM scenarios 
+    LEFT JOIN jeux ON scenarios.JeuScenario = jeux.idJeu 
+    WHERE scenarios.idScenario = ?`;
 
   connection.query(sqlGetScenario, [scenarioId], (err, result) => {
     if (err) {
@@ -154,6 +158,7 @@ app.get("/getScenarioById/:scenarioId", (req, res) => {
     }
   });
 });
+
 
 app.get("/getAllGameTags", (req, res) => {
   const sqlGetAllTags = "SELECT CategorieJeu FROM jeux";
@@ -210,7 +215,12 @@ app.get("/getGamesByTag/:tag", (req, res) => {
 });
 
 app.get("/getAllScenarios", (req, res) => {
-  const sqlGetAllScenarios = "SELECT * FROM scenarios";
+  const sqlGetAllScenarios = `
+    SELECT 
+      scenarios.*, 
+      jeux.NomJeu AS GameName 
+    FROM scenarios 
+    LEFT JOIN jeux ON scenarios.JeuScenario = jeux.idJeu`;
 
   connection.query(sqlGetAllScenarios, (err, result) => {
     if (err) {
@@ -222,6 +232,7 @@ app.get("/getAllScenarios", (req, res) => {
     res.status(200).json(result);
   });
 });
+
 
 app.get("/getScenariosByTag/:tag", (req, res) => {
   const tag = req.params.tag;
@@ -236,4 +247,4 @@ app.get("/getScenariosByTag/:tag", (req, res) => {
 
     res.status(200).json(result);
   });
-});
+}); 

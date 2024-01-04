@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom'; // Import Link
+import { useParams, Link } from 'react-router-dom';
 import styles from './Scenario.module.scss';
 
 const Scenario = () => {
@@ -30,6 +30,8 @@ const Scenario = () => {
         <>
           <h1>{scenario.NomScenario}</h1>
           <h2>{scenario.DescScenario}</h2>
+          <h3>Jeu :</h3>
+          <Link to={`/jeu/${scenario.JeuScenario}`}>{scenario.NomJeu}</Link>
           <h3>Tags:</h3>
           <ul>
             {scenario.CategorieScenario.split(',')

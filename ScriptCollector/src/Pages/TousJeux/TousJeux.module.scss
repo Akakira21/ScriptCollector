@@ -1,0 +1,50 @@
+.tousJeux {
+  ul {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 20px;
+    padding: 10px;
+    list-style-type: none;
+
+    @media (max-width: 1200px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  }
+  .gameItem {
+    padding: 0;
+    text-align: center;
+  }
+  
+  .gameName {
+    display: block;
+    padding: 5px 0 5px 0;
+    color: inherit;
+    border: 1px solid black;
+    background-color: rgba(255, 228, 192, 0.7);
+    transition: color 0.1s;
+
+    &:hover {
+      background-color: rgba(51, 51, 51, 0.9);
+      color: white;
+    }
+  }
+  
+  .gameDescription {
+    font-size: 0.9em;
+    padding: 5px;
+    background-color: rgba(255, 245, 232, 0.7);
+    border-bottom: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    min-height: 100px;
+  }
