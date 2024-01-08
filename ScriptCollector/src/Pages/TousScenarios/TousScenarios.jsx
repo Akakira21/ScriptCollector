@@ -12,9 +12,7 @@ const TousScenarios = () => {
       const response = await fetch("http://localhost:8000/getAllScenarios");
       if (response.ok) {
         const data = await response.json();
-        setScenarios(
-          data.sort((a, b) => a.NomScenario.localeCompare(b.NomScenario))
-        );
+        setScenarios(data.sort((a, b) => a.NomScenario.localeCompare(b.NomScenario)));
       }
     };
 
@@ -39,25 +37,20 @@ const TousScenarios = () => {
     <div className={styles.tousScenarios}>
       <h1>Tous les scénarios</h1>
       <select onChange={handleTagChange} defaultValue="">
-        <option value="" disabled>
-          Select a tag
-        </option>
+        <option value="" disabled>Select a tag</option>
         {tags.map((tag, index) => (
-          <option key={index} value={tag}>
-            {tag}
-          </option>
+          <option key={index} value={tag}>{tag}</option>
         ))}
       </select>
       <ul>
         {scenarios.map((scenario, index) => (
           <li key={index} className={styles.scenarioItem}>
-            <Link
-              to={`/scenario/${scenario.idScenario}`}
-              className={styles.scenarioName}
-            >
+            <Link to={`/scenario/${scenario.idScenario}`} className={styles.scenarioName}>
               {scenario.NomScenario}
             </Link>
-            <div className={styles.gameName}>{scenario.GameName}</div>
+            <Link to={`/jeu/${scenario.JeuScenario}`} className={styles.gameName}>
+              <div>Jeu : {scenario.GameName}</div>
+            </Link>
           </li>
         ))}
       </ul>
