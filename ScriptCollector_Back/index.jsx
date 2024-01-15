@@ -248,3 +248,25 @@ app.get("/getScenariosByTag/:tag", (req, res) => {
     res.status(200).json(result);
   });
 }); 
+
+app.post('/createScenario', (req, res) => {
+  const { NomScenario, DescScenario, CategorieScenario, JeuScenario, ContenuScenario } = req.body;
+
+  const currentDate = new Date().toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+  });
+
+  const sqlInsert = 'INSERT INTO scenarios (NomScenario, DescScenario, CategorieScenario, JeuScenario, ContenuScenario, DateScenario) VALUES (?, ?, ?, ?, ?, ?)';
+  const values = [NomScenario, DescScenario, CategorieScenario, JeuScenario, ContenuScenario, currentDate];
+
+  connection.query(sqlInsert, values, (err, result) => {
+      if (err) {
+          console.error(err);
+          res.status(500).json({ message: 'Erreur lors de la création du scénario' });
+      } else {
+          res.status(200).json({ message: 'Scénario créé avec succès'});
+      }
+  });
+});
