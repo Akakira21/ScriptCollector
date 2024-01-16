@@ -1,20 +1,19 @@
 const express = require("express");
 const mysql = require("mysql");
 const bodyParser = require("body-parser");
-const bcrypt = require ("bcrypt")
+const bcrypt = require("bcrypt");
+
 
 const app = express();
 
 app.use(bodyParser.json());
 
-const port = 8000
-;
-
+const port = 8000;
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
-  database: "scriptcollector"
+  database: "scriptcollector",
 });
 
 connection.connect((err) => {
@@ -34,25 +33,33 @@ app.listen(port, () => {
 });
 
 app.post("/addUser", async (req, res) => {
-  const date = new Date();
+
+  const currentDate = new Date().toLocaleDateString("fr-FR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
   const { username, email, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
-  const sqlEmail = "SELECT email FROM users WHERE email = ?"
+  const sqlEmail = "SELECT email FROM users WHERE email = ?";
   const emailValue = [email];
+
   connection.query(sqlEmail, emailValue, (err, result) => {
     if (err) throw err;
     if (result.length !== 0) {
       res.status(200).json({ message: "Mail existant" });
     } else {
-      const sqlInsert = "INSERT INTO users ( email, password, username, date ) VALUES (?, ?, ?, ?)";
-      const values = [email, hashedPassword,username , date];
+      const sqlInsert =
+        "INSERT INTO users ( email, password, username, date ) VALUES (?, ?, ?, ?)";
+      const values = [email, hashedPassword, username, currentDate];
       connection.query(sqlInsert, values, (err, result) => {
         if (err) throw err;
-        res.status(200).json({ message: "Ok"})
-      })
+        res.status(200).json({ message: "Ok" });
+      });
     }
-  })
-})
+  });
+});
 
 app.post("/getUserByEmail", (req, res) => {
   const { email, password } = req.body;
@@ -69,17 +76,18 @@ app.post("/getUserByEmail", (req, res) => {
     if (result.length > 0) {
       const user = result[0];
       const passwordMatch = await bcrypt.compare(password, user.password);
-      
+
       if (passwordMatch) {
-        res.status(200).json({ 
-          message: "Connexion réussie", 
+        res.status(200).json({
+          message: "Connexion réussie",
           user: {
-            email: user.email, 
-            name: user.username
-          }
+            email: user.email,
+            name: user.username,
+            idUser: user.idUser
+          },
         });
       } else {
-        res.status(401).json({ message: "Identifiant ou mot de passe incorrect" });
+        res.status(401).json({ message: "erreur" });
       }
     } else {
       res.status(404).json({ message: "Utilisateur non trouvé" });
@@ -91,18 +99,17 @@ app.get("/getAllGames", (req, res) => {
   const sqlGetAllGames = "SELECT * FROM jeux";
 
   connection.query(sqlGetAllGames, (err, result) => {
-      if (err) {
-          console.error(err);
-          res.status(500).json({ message: "Internal server error" });
-          return;
-      }
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
 
-      res.status(200).json(result);
+    res.status(200).json(result);
   });
 });
 
 app.get("/getGameById/:gameId", (req, res) => {
-
   const gameId = req.params.gameId;
   const sqlGetGame = "SELECT * FROM jeux WHERE idJeu = ?";
 
@@ -159,7 +166,6 @@ app.get("/getScenarioById/:scenarioId", (req, res) => {
   });
 });
 
-
 app.get("/getAllGameTags", (req, res) => {
   const sqlGetAllTags = "SELECT CategorieJeu FROM jeux";
 
@@ -171,9 +177,9 @@ app.get("/getAllGameTags", (req, res) => {
     }
 
     const allTags = result
-      .flatMap(row => row.CategorieJeu.split(','))
-      .map(tag => tag.trim())
-      .filter(tag => tag)
+      .flatMap((row) => row.CategorieJeu.split(","))
+      .map((tag) => tag.trim())
+      .filter((tag) => tag)
       .filter((value, index, self) => self.indexOf(value) === index);
 
     res.status(200).json(allTags);
@@ -191,9 +197,11 @@ app.get("/getAllScenarioTags", (req, res) => {
     }
 
     const allTags = result
-      .flatMap(row => row.CategorieScenario ? row.CategorieScenario.split(',') : [])
-      .map(tag => tag.trim())
-      .filter(tag => tag)
+      .flatMap((row) =>
+        row.CategorieScenario ? row.CategorieScenario.split(",") : []
+      )
+      .map((tag) => tag.trim())
+      .filter((tag) => tag)
       .filter((value, index, self) => self.indexOf(value) === index);
 
     res.status(200).json(allTags);
@@ -233,10 +241,10 @@ app.get("/getAllScenarios", (req, res) => {
   });
 });
 
-
 app.get("/getScenariosByTag/:tag", (req, res) => {
   const tag = req.params.tag;
-  const sqlGetScenariosByTag = "SELECT * FROM scenarios WHERE FIND_IN_SET(?, CategorieScenario) > 0";
+  const sqlGetScenariosByTag =
+    "SELECT * FROM scenarios WHERE FIND_IN_SET(?, CategorieScenario) > 0";
 
   connection.query(sqlGetScenariosByTag, [tag], (err, result) => {
     if (err) {
@@ -247,26 +255,42 @@ app.get("/getScenariosByTag/:tag", (req, res) => {
 
     res.status(200).json(result);
   });
-}); 
+});
 
-app.post('/createScenario', (req, res) => {
-  const { NomScenario, DescScenario, CategorieScenario, JeuScenario, ContenuScenario } = req.body;
+app.post("/createScenario", (req, res) => {
+  const {
+    NomScenario,
+    DescScenario,
+    CategorieScenario,
+    JeuScenario,
+    ContenuScenario,
+  } = req.body;
 
-  const currentDate = new Date().toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
+  const currentDate = new Date().toLocaleDateString("fr-FR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   });
 
-  const sqlInsert = 'INSERT INTO scenarios (NomScenario, DescScenario, CategorieScenario, JeuScenario, ContenuScenario, DateScenario) VALUES (?, ?, ?, ?, ?, ?)';
-  const values = [NomScenario, DescScenario, CategorieScenario, JeuScenario, ContenuScenario, currentDate];
+  const sqlInsert = "INSERT INTO scenarios (NomScenario, DescScenario, CategorieScenario, JeuScenario, ContenuScenario, DateScenario, idUserScenario) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  const values = [
+    NomScenario,
+    DescScenario,
+    CategorieScenario,
+    JeuScenario,
+    ContenuScenario,
+    currentDate,
+    req.body.idUserScenario
+  ];
 
   connection.query(sqlInsert, values, (err, result) => {
-      if (err) {
-          console.error(err);
-          res.status(500).json({ message: 'Erreur lors de la création du scénario' });
-      } else {
-          res.status(200).json({ message: 'Scénario créé avec succès'});
-      }
+    if (err) {
+      console.error(err);
+      res.status(500).json({
+        message: "Erreur lors de la création du scénario: " + err.message,
+      });
+      return;
+    }
+    res.status(200).json({ message: 'Scénario créé avec succès', idScenario: result.insertId });
   });
 });

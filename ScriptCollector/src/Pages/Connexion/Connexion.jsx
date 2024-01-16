@@ -28,7 +28,6 @@ function Connexion() {
 
 
       async function submit(values) {
-        console.log(values);
         let user = {
           email: values.email,
           password: values.password,
@@ -52,7 +51,13 @@ function Connexion() {
               login({ email: values.email, name: res.user.name });
               setFeedback("Connexion réussie");
               navigate('/');
-            }
+            }         
+          } else if (response.status === 401) {
+            setFeedback("Identifiant ou mot de passe incorrecte");
+          } else if (response.status === 404) {
+            setFeedback("Utilisateur non trouvé");
+          } else if (!response.ok) {
+            setFeedback("Une erreur s'est produite lors de la connexion.");
           } else {
             setFeedback("Une erreur s'est produite lors de la connexion.");
           }
@@ -62,7 +67,6 @@ function Connexion() {
         }
       }
       
-
     return (
         <div className={styles.connexionMain}>
             <form onSubmit={handleSubmit(submit)}>
@@ -80,6 +84,8 @@ function Connexion() {
                     </label>
                     {errors.password && <p>Ce champs est requis.</p>}
                 </div>
+
+                {feedback && <p className={styles.feedbackMessage}>{feedback}</p>}
 
                 <button >Connexion</button>
                 <button><Link to ="/nouveaucompte">Créer un nouveau compte</Link></button>

@@ -9,9 +9,6 @@ const EcrireScenario = () => {
       <div className={styles.textEcriture}>
         <br></br>
         <p>
-          Absolument, voici deux paragraphes expliquant les règles que les
-          utilisateurs doivent suivre pour que leurs scénarios soient publiés
-          sur la plateforme :<br></br>
           <br></br>
           Pour garantir un environnement respectueux et inclusif sur notre
           plateforme, nous vous prions de suivre certaines règles lors de la

@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useAuth } from "../../Components/AuthContext/AuthContext";
 import styles from "./CreationScenario.module.scss";
 
 const CreationScenario = () => {
+  const [feedback, setFeedback] = useState("");
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm();
   const [games, setGames] = useState([]);
@@ -23,22 +29,38 @@ const CreationScenario = () => {
   }, []);
 
   const onSubmit = async (data) => {
+    const scenarioData = {
+      ...data,
+      idUserScenario: user.idUser,
+    };
+
+    console.log("User ID: ", user?.Id);
+    console.log("Scenario Data: ", scenarioData);
+
     try {
       const response = await fetch("http://localhost:8000/createScenario", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(scenarioData),
       });
 
       if (response.ok) {
-        alert("Scénario créé avec succès");
+        const result = await response.json();
+        setFeedback("Scénario créé avec succès, vous allez être redirigé");
+
+        reset();
+
+        setTimeout(() => {
+          navigate(`/scenario/${result.idScenario}`);
+        }, 1250);
       } else {
-        alert("Erreur lors de la création du scénario");
+        setFeedback("Erreur lors de la création du scénario");
       }
     } catch (error) {
       console.error("Erreur de soumission:", error);
+      setFeedback("Erreur de connexion au serveur.");
     }
   };
 
@@ -86,9 +108,12 @@ const CreationScenario = () => {
 
         <div>
           <label>Contenu:</label>
-          <textarea {...register("Contenu", { required: true })}></textarea>
+          <textarea
+            {...register("ContenuScenario", { required: true })}
+          ></textarea> 
           {errors.Contenu && <span>Ce champ est requis</span>}
         </div>
+        {feedback && <p className={styles.feedbackMessage}>{feedback}</p>}
         <button type="submit">Créer</button>
       </form>
     </div>

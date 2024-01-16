@@ -8,7 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 function NouveauCompte() {
 
     const yupSchema = yup.object({
-        name: yup
+        username: yup
         .string()
         .required("Le champ est obligatoire."),
         email: yup
@@ -39,7 +39,7 @@ function NouveauCompte() {
     })
 
     const defaultValues = {
-      name: "",
+      username: "",
       email: "",
       confEmail: "",
       password: "",
@@ -98,7 +98,7 @@ function NouveauCompte() {
               
                 <div>
                   <p>Votre compte a été crée</p>
-                  <button><Link to ='/moncompte'>Aller sur mon compte</Link></button>
+                  <button><Link to ='/connexion'>Se Connecter</Link></button>
                 </div>
 
             ) : (
