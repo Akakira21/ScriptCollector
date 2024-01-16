@@ -179,6 +179,20 @@ app.get("/getScenarioById/:scenarioId", (req, res) => {
   });
 });
 
+app.get("/getScenariosByUserId/:userId", (req, res) => {
+  const userId = req.params.userId;
+  const sqlGetScenarios = "SELECT * FROM scenarios WHERE idUserScenario = ?";
+
+  connection.query(sqlGetScenarios, [userId], (err, result) => {
+      if (err) {
+          console.error(err);
+          res.status(500).json({ message: "Internal server error" });
+          return;
+      }
+      res.status(200).json(result);
+  });
+});
+
 app.get("/getAllGameTags", (req, res) => {
   const sqlGetAllTags = "SELECT CategorieJeu FROM jeux";
 

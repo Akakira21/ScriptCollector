@@ -133,7 +133,7 @@ function App() {
           errorElement: <Error/>,
         },
         {
-          path: "/moncompte",
+          path: "/moncompte/:idUser",
           element: <MonCompte/>,
           errorElement: <Error/>,
         },

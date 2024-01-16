@@ -24,7 +24,7 @@ function Navbar() {
                 </Link>
               </li>
               <li>
-                <Link to="/moncompte">{user.name}</Link>
+                <Link to={`/moncompte/${user.idUser}`}>{user.name}</Link>
               </li>
               {user.rangUser === 1 && (
                 <li>
