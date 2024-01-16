@@ -3,7 +3,6 @@ const mysql = require("mysql");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 
-
 const app = express();
 
 app.use(bodyParser.json());
@@ -33,7 +32,6 @@ app.listen(port, () => {
 });
 
 app.post("/addUser", async (req, res) => {
-
   const currentDate = new Date().toLocaleDateString("fr-FR", {
     year: "numeric",
     month: "2-digit",
@@ -83,7 +81,8 @@ app.post("/getUserByEmail", (req, res) => {
           user: {
             email: user.email,
             name: user.username,
-            idUser: user.idUser
+            idUser: user.idUser,
+            rangUser: user.rangUser,
           },
         });
       } else {
@@ -94,6 +93,20 @@ app.post("/getUserByEmail", (req, res) => {
     }
   });
 });
+
+app.get("/getAllUsers", (req, res) => {
+  const sql = "SELECT username, email, rangUser, date FROM users";
+
+  connection.query(sql, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
+    res.status(200).json(result);
+  });
+});
+
 
 app.get("/getAllGames", (req, res) => {
   const sqlGetAllGames = "SELECT * FROM jeux";
@@ -257,6 +270,45 @@ app.get("/getScenariosByTag/:tag", (req, res) => {
   });
 });
 
+app.get("/getRecentScenarios", (req, res) => {
+  const sqlGetRecentScenarios = `
+    SELECT 
+      scenarios.*, 
+      jeux.NomJeu AS GameName 
+    FROM scenarios 
+    LEFT JOIN jeux ON scenarios.JeuScenario = jeux.idJeu
+    ORDER BY STR_TO_DATE(DateScenario, '%d/%m/%Y') DESC
+    LIMIT 10`;
+
+  connection.query(sqlGetRecentScenarios, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
+
+    res.status(200).json(result);
+  });
+});
+
+app.get("/getAllScenariosWithDetails", (req, res) => {
+  const sql = `
+    SELECT scenarios.*, jeux.NomJeu, users.username AS PostedBy
+    FROM scenarios
+    JOIN jeux ON scenarios.JeuScenario = jeux.idJeu
+    JOIN users ON scenarios.idUserScenario = users.idUser`;
+
+  connection.query(sql, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
+    res.status(200).json(result);
+  });
+});
+
+
 app.post("/createScenario", (req, res) => {
   const {
     NomScenario,
@@ -272,7 +324,8 @@ app.post("/createScenario", (req, res) => {
     day: "2-digit",
   });
 
-  const sqlInsert = "INSERT INTO scenarios (NomScenario, DescScenario, CategorieScenario, JeuScenario, ContenuScenario, DateScenario, idUserScenario) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  const sqlInsert =
+    "INSERT INTO scenarios (NomScenario, DescScenario, CategorieScenario, JeuScenario, ContenuScenario, DateScenario, idUserScenario) VALUES (?, ?, ?, ?, ?, ?, ?)";
   const values = [
     NomScenario,
     DescScenario,
@@ -280,7 +333,7 @@ app.post("/createScenario", (req, res) => {
     JeuScenario,
     ContenuScenario,
     currentDate,
-    req.body.idUserScenario
+    req.body.idUserScenario,
   ];
 
   connection.query(sqlInsert, values, (err, result) => {
@@ -291,6 +344,11 @@ app.post("/createScenario", (req, res) => {
       });
       return;
     }
-    res.status(200).json({ message: 'Scénario créé avec succès', idScenario: result.insertId });
+    res
+      .status(200)
+      .json({
+        message: "Scénario créé avec succès",
+        idScenario: result.insertId,
+      });
   });
 });

@@ -6,6 +6,7 @@ import Connexion from './Pages/Connexion/Connexion'
 import NouveauCompte from "./Pages/NouveauCompte/NouveauCompte"
 import APropos from './Pages/A Propos/APropos'
 import MentionsLegales from './Pages/MentionsLegales/MentionsLegales'
+import CGU from './Pages/CGU/CGU'
 import Contact from './Pages/Contact/Contact'
 import Error from './Pages/Error/Error'
 import RecemmentAjoutes from "./Pages/RecemmentAjoutes/RecemmentAjoutes"
@@ -25,6 +26,7 @@ import MonCompte from "./Pages/MonCompte/MonCompte"
 import PublicationScenario from "./Pages/PublicationScenario/PublicationScenario"
 import ScenariosCategories from "./Pages/ScenariosCategories/ScenariosCategories"
 import UtilisationIA from "./Pages/UtilisationIA/UtilisationIA"
+import Admin from "./Pages/Admin/Admin"
 
 
 function App() {
@@ -53,6 +55,11 @@ function App() {
           {
             path: "/mentionslegales",
             element: <MentionsLegales/>,
+            errorElement: <Error/>,
+          },
+          {
+            path: "/cgu",
+            element: <CGU/>,
             errorElement: <Error/>,
           },
           {
@@ -143,6 +150,11 @@ function App() {
         {
           path: "/utilisationia",
           element: <UtilisationIA/>,
+          errorElement: <Error/>,
+        },
+        {
+          path: "/admin",
+          element: <Admin/>,
           errorElement: <Error/>,
         },
       ],

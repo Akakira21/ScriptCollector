@@ -48,10 +48,11 @@ function Connexion() {
             if (res.message === "erreur") {
               setFeedback("Identifiant ou mot de passe incorrecte");
             } else {
-              login({ email: values.email, name: res.user.name });
+              login(res.user);
+              console.log(res.user);
               setFeedback("Connexion réussie");
               navigate('/');
-            }         
+            }           
           } else if (response.status === 401) {
             setFeedback("Identifiant ou mot de passe incorrecte");
           } else if (response.status === 404) {

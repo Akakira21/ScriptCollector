@@ -146,7 +146,7 @@ function NouveauCompte() {
         
                 <div>
                   <label htmlFor="cgu">
-                    CGU
+                    <Link to ='/cgu'>CGU</Link>
                   </label>
                   <input {...register("cgu")} type="checkbox" id="cgu" />
                   { errors?.cgu && <p>{errors.cgu.message}</p>}

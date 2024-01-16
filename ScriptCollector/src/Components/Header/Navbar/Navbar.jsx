@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Navbar.module.scss";
-import { BiSolidUserCircle } from "react-icons/bi";
-import { BiLogOut } from "react-icons/bi";
+import { BiSolidUserCircle, BiLogOut } from "react-icons/bi";
 import { useAuth } from "../../AuthContext/AuthContext";
 
 function Navbar() {
@@ -17,7 +16,6 @@ function Navbar() {
     <div className={styles.navbar}>
       <nav>
         <ul className={styles.listeNav}>
-
           {user ? (
             <>
               <li>
@@ -28,17 +26,19 @@ function Navbar() {
               <li>
                 <Link to="/moncompte">{user.name}</Link>
               </li>
+              {user.rangUser === 1 && (
+                <li>
+                  <Link to={`/admin`}>Admin</Link>
+                </li>
+              )}
             </>
-
           ) : (
-
             <li>
               <Link to="/connexion">
                 <BiSolidUserCircle />
               </Link>
             </li>
           )}
-          
           <li>
             <Link to="/">Accueil</Link>
           </li>
