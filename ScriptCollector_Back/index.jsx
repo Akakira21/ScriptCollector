@@ -366,3 +366,46 @@ app.post("/createScenario", (req, res) => {
       });
   });
 });
+
+app.put('/updateScenario/:scenarioId', async (req, res) => {
+  const { scenarioId } = req.params;
+  const { NomScenario, DescScenario, CategorieScenario, JeuScenario } = req.body;
+
+  const sqlUpdate = `
+    UPDATE scenarios 
+    SET NomScenario = ?, DescScenario = ?, CategorieScenario = ?, JeuScenario = ?
+    WHERE idScenario = ?`;
+
+  connection.query(sqlUpdate, [NomScenario, DescScenario, CategorieScenario, JeuScenario, scenarioId], (err, result) => {
+    if (err) {
+      console.error("Erreur lors de la mise à jour du scénario:", err);
+      res.status(500).json({ message: "Erreur serveur" });
+      return;
+    }
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "Scénario mis à jour avec succès" });
+    } else {
+      res.status(404).json({ message: "Scénario non trouvé" });
+    }
+  });
+});
+
+app.delete("/deleteScenario/:scenarioId", (req, res) => {
+  const { scenarioId } = req.params;
+
+  const sqlDelete = "DELETE FROM scenarios WHERE idScenario = ?";
+
+  connection.query(sqlDelete, [scenarioId], (err, result) => {
+      if (err) {
+          console.error(err);
+          res.status(500).json({ message: "Internal server error" });
+          return;
+      }
+
+      if (result.affectedRows > 0) {
+          res.status(200).json({ message: "Scénario supprimé avec succès" });
+      } else {
+          res.status(404).json({ message: "Scénario non trouvé" });
+      }
+  });
+});

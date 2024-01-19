@@ -17,6 +17,7 @@ import Scenario from "./Pages/Scenario/Scenario"
 import TousScenarios from "./Pages/TousScenarios/TousScenarios"
 import TousJeux from "./Pages/TousJeux/TousJeux"
 import ScenarioSimilaire from "./Pages/ScenarioSimilaire/ScenarioSimilaire"
+import ScenarioEdit from "./Pages/ScenarioEdit/ScenarioEdit"
 import ChoixIA from "./Pages/ChoixIA/ChoixIA"
 import CompteUtilisateur from "./Pages/CompteUtilisateur/CompteUtilisateur"
 import EcrireScenario from "./Pages/EcrireScenario/EcrireScenario"
@@ -105,6 +106,11 @@ function App() {
         {
           path: "/scenariossimilaire",
           element: <ScenarioSimilaire/>,
+          errorElement: <Error/>,
+        },
+        {
+          path: "/scenarioedit/:scenarioId",
+          element: <ScenarioEdit/>,
           errorElement: <Error/>,
         },
         {

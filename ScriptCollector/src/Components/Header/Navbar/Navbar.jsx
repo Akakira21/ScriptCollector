@@ -26,11 +26,6 @@ function Navbar() {
               <li>
                 <Link to={`/moncompte/${user.idUser}`}>{user.name}</Link>
               </li>
-              {user.rangUser === 1 && (
-                <li>
-                  <Link to={`/admin`}>Admin</Link>
-                </li>
-              )}
             </>
           ) : (
             <li>
@@ -51,6 +46,11 @@ function Navbar() {
           <li>
             <Link to="/ecrirescenario">Ecriture</Link>
           </li>
+          {user.rangUser === 1 && (
+                <li>
+                  <Link to={`/admin`}>Admin</Link>
+                </li>
+              )}
         </ul>
       </nav>
     </div>
