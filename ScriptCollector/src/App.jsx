@@ -26,7 +26,6 @@ import JeuxSimilaire from "./Pages/JeuxSimilaire/JeuxSimilaire"
 import MonCompte from "./Pages/MonCompte/MonCompte"
 import PublicationScenario from "./Pages/PublicationScenario/PublicationScenario"
 import ScenariosCategories from "./Pages/ScenariosCategories/ScenariosCategories"
-import UtilisationIA from "./Pages/UtilisationIA/UtilisationIA"
 import Admin from "./Pages/Admin/Admin"
 
 
@@ -152,11 +151,6 @@ function App() {
         path: "/scenarioscategories/:tag",
         element: <ScenariosCategories />,
         errorElement: <Error />,
-        },
-        {
-          path: "/utilisationia",
-          element: <UtilisationIA/>,
-          errorElement: <Error/>,
         },
         {
           path: "/admin",
