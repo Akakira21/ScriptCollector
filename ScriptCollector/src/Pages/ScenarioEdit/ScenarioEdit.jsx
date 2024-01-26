@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ConfirmationPopUp from '../../Components/ConfirmationPopUp/ConfirmationPopUp';
-import styles from './ScenarioEdit.modules.scss';
+import styles from "./ScenarioEdit.module.scss";
 
 const ScenarioEdit = () => {
   const { scenarioId } = useParams();

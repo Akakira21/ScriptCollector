@@ -46,7 +46,7 @@ function Navbar() {
           <li>
             <Link to="/ecrirescenario">Ecriture</Link>
           </li>
-          {user.rangUser === 1 && (
+          {user?.rangUser === 1 && (
                 <li>
                   <Link to={`/admin`}>Admin</Link>
                 </li>

@@ -91,6 +91,7 @@ function Connexion() {
                 <button >Connexion</button>
                 <button><Link to ="/nouveaucompte">Créer un nouveau compte</Link></button>
             </form>
+            <Link to ="/cgu">Accéder aux CGU</Link>
         </div>
     )
 }
