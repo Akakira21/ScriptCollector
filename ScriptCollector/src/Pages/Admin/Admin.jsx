@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../Components/AuthContext/AuthContext";
 import { useNavigate } from "react-router-dom";
 
+import { getAllGames } from '../../api/game';
+import { getAllScenariosWithDetails } from '../../api/scenario';
+import { getAllUsers } from '../../api/user';
+
 const Admin = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -10,36 +14,23 @@ const Admin = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    const fetchScenarios = async () => {
-      const response = await fetch(
-        "http://localhost:8000/controllers/scenarioController.jsx/getAllScenariosWithDetails"
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setScenarios(data);
+    const fetchData = async () => {
+      try {
+        const scenarioData = await getAllScenariosWithDetails();
+        setScenarios(scenarioData);
+  
+        const gameData = await getAllGames();
+        setGames(gameData);
+  
+        const userData = await getAllUsers();
+        setUsers(userData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
       }
     };
-
-    const fetchGames = async () => {
-      const response = await fetch("http://localhost:8000/getAllGames");
-      if (response.ok) {
-        const data = await response.json();
-        setGames(data);
-      }
-    };
-
-    const fetchUsers = async () => {
-      const response = await fetch("http://localhost:8000/getAllUsers");
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-      }
-    };
-
-    fetchScenarios();
-    fetchGames();
-    fetchUsers();
-  }, []);
+  
+    fetchData();
+  }, []);  
 
   return (
     <div>

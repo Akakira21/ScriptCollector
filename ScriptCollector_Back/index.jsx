@@ -1,21 +1,14 @@
 const express = require("express");
-const { errorHandler } = require('./middleware/errorHandler');
 const bodyParser = require("body-parser");
-const apiRoutes = require('./routes/api');
 const app = express();
+const apiRoutes = require('./routes/api');
+const { errorHandler } = require('./middleware/errorHandler');
 
 // Database connection setup
 const db = require('./database/connection');
 
-// Import routes
-const userRoutes = require('./routes/userRoutes');
-const gameRoutes = require('./routes/gameRoutes');
-const scenarioRoutes = require('./routes/scenarioRoutes');
-
-// Middleware
 app.use(bodyParser.json());
 app.use(errorHandler);
-
 
 // CORS Headers Middleware
 app.use((req, res, next) => {
@@ -25,14 +18,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Use routes
+// Use consolidated API routes
 app.use('/api', apiRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/games', gameRoutes);
-app.use('/api/scenarios', scenarioRoutes);
 
 // Server setup
 const port = 8000;
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
+
+module.exports = app;
