@@ -12,7 +12,7 @@ const Admin = () => {
   useEffect(() => {
     const fetchScenarios = async () => {
       const response = await fetch(
-        "http://localhost:8000/getAllScenariosWithDetails"
+        "http://localhost:8000/controllers/scenarioController.jsx/getAllScenariosWithDetails"
       );
       if (response.ok) {
         const data = await response.json();
