@@ -2,6 +2,7 @@ const express = require("express");
 const mysql = require("mysql");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
+const { body, validationResult } = require("express-validator");
 
 const app = express();
 
@@ -27,72 +28,89 @@ app.use((req, res, next) => {
   next();
 });
 
-app.listen(port, () => {
-  console.log(`Serveur Node écoutant sur le port ${port}`);
-});
-
-app.post("/addUser", async (req, res) => {
-  const currentDate = new Date().toLocaleDateString("fr-FR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-
-  const { username, email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const sqlEmail = "SELECT email FROM users WHERE email = ?";
-  const emailValue = [email];
-
-  connection.query(sqlEmail, emailValue, (err, result) => {
-    if (err) throw err;
-    if (result.length !== 0) {
-      res.status(200).json({ message: "Mail existant" });
-    } else {
-      const sqlInsert =
-        "INSERT INTO users ( email, password, username, date ) VALUES (?, ?, ?, ?)";
-      const values = [email, hashedPassword, username, currentDate];
-      connection.query(sqlInsert, values, (err, result) => {
-        if (err) throw err;
-        res.status(200).json({ message: "Ok" });
-      });
-    }
-  });
-});
-
-app.post("/getUserByEmail", (req, res) => {
-  const { email, password } = req.body;
-  console.log(req.body);
-  const sqlGet = "SELECT * FROM users WHERE email = ?";
-
-  connection.query(sqlGet, [email], async (err, result) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ message: "Internal server error" });
-      return;
+app.post(
+  "/addUser",
+  [
+    body("username").trim().escape(),
+    body("email").isEmail().normalizeEmail(),
+    body("password").isLength({ min: 5 }).escape(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    if (result.length > 0) {
-      const user = result[0];
-      const passwordMatch = await bcrypt.compare(password, user.password);
+    const currentDate = new Date().toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
 
-      if (passwordMatch) {
-        res.status(200).json({
-          message: "Connexion réussie",
-          user: {
-            email: user.email,
-            name: user.username,
-            idUser: user.idUser,
-            rangUser: user.rangUser,
-          },
-        });
+    const { username, email, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const sqlEmail = "SELECT email FROM users WHERE email = ?";
+    const emailValue = [email];
+
+    connection.query(sqlEmail, emailValue, (err, result) => {
+      if (err) throw err;
+      if (result.length !== 0) {
+        res.status(200).json({ message: "Mail existant" });
       } else {
-        res.status(401).json({ message: "erreur" });
+        const sqlInsert =
+          "INSERT INTO users ( email, password, username, date ) VALUES (?, ?, ?, ?)";
+        const values = [email, hashedPassword, username, currentDate];
+        connection.query(sqlInsert, values, (err, result) => {
+          if (err) throw err;
+          res.status(200).json({ message: "Ok" });
+        });
       }
-    } else {
-      res.status(404).json({ message: "Utilisateur non trouvé" });
+    });
+  }
+);
+
+app.post(
+  "/getUserByEmail",
+  [body("email").isEmail().normalizeEmail(), body("password").notEmpty()],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-  });
-});
+
+    const { email, password } = req.body;
+    const sqlGet = "SELECT * FROM users WHERE email = ?";
+
+    connection.query(sqlGet, [email], async (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal server error" });
+        return;
+      }
+
+      if (result.length > 0) {
+        const user = result[0];
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (passwordMatch) {
+          res.status(200).json({
+            message: "Connexion réussie",
+            user: {
+              email: user.email,
+              name: user.username,
+              idUser: user.idUser,
+              rangUser: user.rangUser,
+            },
+          });
+        } else {
+          res.status(401).json({ message: "Erreur" });
+        }
+      } else {
+        res.status(404).json({ message: "Utilisateur non trouvé" });
+      }
+    });
+  }
+);
 
 app.get("/getAllUsers", (req, res) => {
   const sql = "SELECT username, email, rangUser, date FROM users";
@@ -106,7 +124,6 @@ app.get("/getAllUsers", (req, res) => {
     res.status(200).json(result);
   });
 });
-
 
 app.get("/getAllGames", (req, res) => {
   const sqlGetAllGames = "SELECT * FROM jeux";
@@ -122,7 +139,11 @@ app.get("/getAllGames", (req, res) => {
   });
 });
 
-app.get("/getGameById/:gameId", (req, res) => {
+app.get("/getGameById/:gameId", param("gameId").isNumeric(), (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   const gameId = req.params.gameId;
   const sqlGetGame = "SELECT * FROM jeux WHERE idJeu = ?";
 
@@ -141,22 +162,36 @@ app.get("/getGameById/:gameId", (req, res) => {
   });
 });
 
-app.get("/getScenariosByGameId/:gameId", (req, res) => {
-  const gameId = req.params.gameId;
-  const sqlGetScenarios = "SELECT * FROM scenarios WHERE JeuScenario = ?";
-
-  connection.query(sqlGetScenarios, [gameId], (err, result) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({ message: "Internal server error" });
-      return;
+app.get(
+  "/getScenariosByGameId/:gameId",
+  param("gameId").isNumeric(),
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+    const gameId = req.params.gameId;
+    const sqlGetScenarios = "SELECT * FROM scenarios WHERE JeuScenario = ?";
 
-    res.status(200).json(result);
-  });
-});
+    connection.query(sqlGetScenarios, [gameId], (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ message: "Internal server error" });
+        return;
+      }
 
-app.get("/getScenarioById/:scenarioId", (req, res) => {
+      res.status(200).json(result);
+    });
+  }
+);
+
+app.get("/getScenarioById/:scenarioId", 
+  param('scenarioId').isNumeric(),
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
   const scenarioId = req.params.scenarioId;
   const sqlGetScenario = `
     SELECT scenarios.*, jeux.NomJeu 
@@ -179,17 +214,23 @@ app.get("/getScenarioById/:scenarioId", (req, res) => {
   });
 });
 
-app.get("/getScenariosByUserId/:userId", (req, res) => {
+app.get("/getScenariosByUserId/:userId", 
+  param('userId').isNumeric(),
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
   const userId = req.params.userId;
   const sqlGetScenarios = "SELECT * FROM scenarios WHERE idUserScenario = ?";
 
   connection.query(sqlGetScenarios, [userId], (err, result) => {
-      if (err) {
-          console.error(err);
-          res.status(500).json({ message: "Internal server error" });
-          return;
-      }
-      res.status(200).json(result);
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
+    res.status(200).json(result);
   });
 });
 
@@ -235,7 +276,13 @@ app.get("/getAllScenarioTags", (req, res) => {
   });
 });
 
-app.get("/getGamesByTag/:tag", (req, res) => {
+app.get("/getGamesByTag/:tag", 
+  param('tag').trim().escape(),
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
   const tag = req.params.tag;
   const sql = "SELECT * FROM jeux WHERE FIND_IN_SET(?, CategorieJeu) > 0";
 
@@ -268,7 +315,13 @@ app.get("/getAllScenarios", (req, res) => {
   });
 });
 
-app.get("/getScenariosByTag/:tag", (req, res) => {
+app.get("/getScenariosByTag/:tag", 
+  param('tag').trim().escape(),
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
   const tag = req.params.tag;
   const sqlGetScenariosByTag =
     "SELECT * FROM scenarios WHERE FIND_IN_SET(?, CategorieScenario) > 0";
@@ -322,73 +375,100 @@ app.get("/getAllScenariosWithDetails", (req, res) => {
   });
 });
 
-
-app.post("/createScenario", (req, res) => {
-  const {
-    NomScenario,
-    DescScenario,
-    CategorieScenario,
-    JeuScenario,
-    ContenuScenario,
-  } = req.body;
-
-  const currentDate = new Date().toLocaleDateString("fr-FR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-
-  const sqlInsert =
-    "INSERT INTO scenarios (NomScenario, DescScenario, CategorieScenario, JeuScenario, ContenuScenario, DateScenario, idUserScenario) VALUES (?, ?, ?, ?, ?, ?, ?)";
-  const values = [
-    NomScenario,
-    DescScenario,
-    CategorieScenario,
-    JeuScenario,
-    ContenuScenario,
-    currentDate,
-    req.body.idUserScenario,
-  ];
-
-  connection.query(sqlInsert, values, (err, result) => {
-    if (err) {
-      console.error(err);
-      res.status(500).json({
-        message: "Erreur lors de la création du scénario: " + err.message,
-      });
-      return;
+app.post(
+  "/createScenario",
+  [
+    body("NomScenario").trim().escape(),
+    body("DescScenario").trim().escape(),
+    body("CategorieScenario").trim().escape(),
+    body("JeuScenario").isNumeric(),
+    body("ContenuScenario").trim().escape(),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-    res
-      .status(200)
-      .json({
+
+    const currentDate = new Date().toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+
+    const {
+      NomScenario,
+      DescScenario,
+      CategorieScenario,
+      JeuScenario,
+      ContenuScenario,
+    } = req.body;
+    const sqlInsert =
+      "INSERT INTO scenarios (NomScenario, DescScenario, CategorieScenario, JeuScenario, ContenuScenario, DateScenario, idUserScenario) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    const values = [
+      NomScenario,
+      DescScenario,
+      CategorieScenario,
+      JeuScenario,
+      ContenuScenario,
+      currentDate,
+      req.body.idUserScenario,
+    ];
+
+    connection.query(sqlInsert, values, (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({
+          message: "Erreur lors de la création du scénario: " + err.message,
+        });
+        return;
+      }
+      res.status(200).json({
         message: "Scénario créé avec succès",
         idScenario: result.insertId,
       });
-  });
-});
+    });
+  }
+);
 
-app.put('/updateScenario/:scenarioId', async (req, res) => {
-  const { scenarioId } = req.params;
-  const { NomScenario, DescScenario, CategorieScenario, JeuScenario } = req.body;
-
-  const sqlUpdate = `
-    UPDATE scenarios 
-    SET NomScenario = ?, DescScenario = ?, CategorieScenario = ?, JeuScenario = ?
-    WHERE idScenario = ?`;
-
-  connection.query(sqlUpdate, [NomScenario, DescScenario, CategorieScenario, JeuScenario, scenarioId], (err, result) => {
-    if (err) {
-      console.error("Erreur lors de la mise à jour du scénario:", err);
-      res.status(500).json({ message: "Erreur serveur" });
-      return;
+app.put(
+  "/updateScenario/:scenarioId",
+  [
+    body("NomScenario").trim().escape(),
+    body("DescScenario").trim().escape(),
+    body("CategorieScenario").trim().escape(),
+    body("JeuScenario").isNumeric(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-    if (result.affectedRows > 0) {
-      res.status(200).json({ message: "Scénario mis à jour avec succès" });
-    } else {
-      res.status(404).json({ message: "Scénario non trouvé" });
-    }
-  });
-});
+
+    const { scenarioId } = req.params;
+    const { NomScenario, DescScenario, CategorieScenario, JeuScenario } =
+      req.body;
+
+    const sqlUpdate =
+      "UPDATE scenarios SET NomScenario = ?, DescScenario = ?, CategorieScenario = ?, JeuScenario = ? WHERE idScenario = ?";
+    connection.query(
+      sqlUpdate,
+      [NomScenario, DescScenario, CategorieScenario, JeuScenario, scenarioId],
+      (err, result) => {
+        if (err) {
+          console.error("Erreur lors de la mise à jour du scénario:", err);
+          res.status(500).json({ message: "Erreur serveur" });
+          return;
+        }
+        if (result.affectedRows > 0) {
+          res.status(200).json({ message: "Scénario mis à jour avec succès" });
+        } else {
+          res.status(404).json({ message: "Scénario non trouvé" });
+        }
+      }
+    );
+  }
+);
 
 app.delete("/deleteScenario/:scenarioId", (req, res) => {
   const { scenarioId } = req.params;
@@ -396,16 +476,20 @@ app.delete("/deleteScenario/:scenarioId", (req, res) => {
   const sqlDelete = "DELETE FROM scenarios WHERE idScenario = ?";
 
   connection.query(sqlDelete, [scenarioId], (err, result) => {
-      if (err) {
-          console.error(err);
-          res.status(500).json({ message: "Internal server error" });
-          return;
-      }
+    if (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
 
-      if (result.affectedRows > 0) {
-          res.status(200).json({ message: "Scénario supprimé avec succès" });
-      } else {
-          res.status(404).json({ message: "Scénario non trouvé" });
-      }
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "Scénario supprimé avec succès" });
+    } else {
+      res.status(404).json({ message: "Scénario non trouvé" });
+    }
   });
+});
+
+app.listen(port, () => {
+  console.log(`Serveur Node écoutant sur le port ${port}`);
 });
