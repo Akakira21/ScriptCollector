@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ConfirmationPopUp from '../../Components/ConfirmationPopUp/ConfirmationPopUp';
 import styles from "./ScenarioEdit.module.scss";
 
+import { getScenarioById, updateScenario } from "../../api/scenario";
+
 const ScenarioEdit = () => {
   const { scenarioId } = useParams();
   const navigate = useNavigate();
@@ -12,13 +14,8 @@ const ScenarioEdit = () => {
   useEffect(() => {
     const fetchScenario = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/getScenarioById/${scenarioId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setScenario(data);
-        } else {
-          console.error("Erreur de récupération du scénario");
-        }
+        const data = await getScenarioById(scenarioId);
+        setScenario(data);
       } catch (error) {
         console.error("Erreur récupération du scénario", error);
       }
@@ -38,19 +35,8 @@ const ScenarioEdit = () => {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/updateScenario/${scenarioId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(scenario),
-      });
-  
-      if (response.ok) {
-        navigate(`/scenario/${scenarioId}`);
-      } else {
-        console.error("Failed to update scenario");
-      }
+      await updateScenario(scenarioId, scenario);
+      navigate(`/scenario/${scenarioId}`);
     } catch (error) {
       console.error("Erreur lors de la modification du scénario", error);
     }

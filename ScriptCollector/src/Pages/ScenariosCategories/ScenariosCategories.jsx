@@ -1,40 +1,55 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import styles from './ScenariosCategories.module.scss';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import styles from "./ScenariosCategories.module.scss";
 
-const ScenariosCategories = () => {
-  const { tag } = useParams();
-  const [scenarios, setScenarios] = useState([]);
+import { getAllGames, getAllGameTags } from "../../api/game";
+
+const TousJeux = () => {
+  const [games, setGames] = useState([]);
+  const [tags, setTags] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchScenarios = async () => {
+    const fetchData = async () => {
       try {
-        let url = tag === 'all' 
-                  ? `http://localhost:8000/getAllScenarios` 
-                  : `http://localhost:8000/getScenariosByTag/${tag}`;
-  
-        const response = await fetch(url);
-        if (response.ok) {
-          const data = await response.json();
-          setScenarios(data);
-        } else {
-          console.error("Erreur de récupération des scénarios");
-        }
+        const gamesData = await getAllGames();
+        setGames(gamesData.sort((a, b) => a.NomJeu.localeCompare(b.NomJeu)));
+
+        const tagsData = await getAllGameTags();
+        setTags(tagsData.sort((a, b) => a.localeCompare(b)));
       } catch (error) {
-        console.error("Erreur de récupération", error);
+        console.error("Error fetching data:", error);
       }
     };
-  
-    fetchScenarios();
-  }, [tag]);
-  
+
+    fetchData();
+  }, []);
+
+  const handleTagChange = (e) => {
+    const selectedTag = e.target.value.toLowerCase();
+    navigate(`/jeuxcategories/${selectedTag}`);
+  };
+
   return (
-    <div className={styles.scenariosCategories}>
-      <h1>Catégories de Scénarios</h1>
+    <div className={styles.tousJeux}>
+      <h1>Tous les jeux</h1>
+      <select onChange={handleTagChange} defaultValue="">
+        <option value="" disabled>
+          Select a tag
+        </option>
+        {tags.map((tag, index) => (
+          <option key={index} value={tag}>
+            {tag}
+          </option>
+        ))}
+      </select>
       <ul>
-        {scenarios.map((scenario, index) => (
-          <li key={index}>
-            <Link to={`/scenario/${scenario.idScenario}`}>{scenario.NomScenario}</Link>
+        {games.map((jeu, index) => (
+          <li key={index} className={styles.gameItem}>
+            <Link to={`/jeu/${jeu.idJeu}`} className={styles.gameName}>
+              {jeu.NomJeu}
+            </Link>
+            <div className={styles.gameDescription}>{jeu.DescJeu}</div>
           </li>
         ))}
       </ul>
@@ -42,4 +57,4 @@ const ScenariosCategories = () => {
   );
 };
 
-export default ScenariosCategories;
+export default TousJeux;

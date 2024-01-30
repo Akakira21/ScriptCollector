@@ -64,33 +64,25 @@ function NouveauCompte() {
     });
 
     async function submit(values) {
-      console.log(values);
-      let user = {};
-      user.username = values.username;
-      user.email = values.email;
-      user.password = values.password;
+      let user = {
+          username: values.username,
+          email: values.email,
+          password: values.password,
+      };
       try {
-        const response = await fetch("http://localhost:8000/addUser", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(user),
-        });
-        if (response.ok) {
-          const res = await response.json()
+          const res = await addUser(user);
           setConnected(true);
           if (res.message === "Mail existant") {
-            setFeedback("Mail déjà existant")
+              setFeedback("Mail déjà existant");
           } else {
-                    reset(defaultValues);
-          setFeedback("L'inscription s'est bien passé.");
+              reset(defaultValues);
+              setFeedback("L'inscription s'est bien passée.");
           }
-        }
       } catch (error) {
-        console.error(error);
+          console.error(error);
+          setFeedback("Erreur lors de la création du compte.");
       }
-    }
+  }
 
     return (
         <div className={styles.nouveauCompteMain}>

@@ -4,6 +4,9 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "../../Components/AuthContext/AuthContext";
 import styles from "./CreationScenario.module.scss";
 
+import { getAllGames } from "../../api/game";
+import { createScenario } from "../../api/scenario";
+
 const CreationScenario = () => {
   const [feedback, setFeedback] = useState("");
   const navigate = useNavigate();
@@ -18,10 +21,11 @@ const CreationScenario = () => {
 
   useEffect(() => {
     const fetchGames = async () => {
-      const response = await fetch("http://localhost:8000/getAllGames");
-      if (response.ok) {
-        const data = await response.json();
-        setGames(data);
+      try {
+        const gamesData = await getAllGames();
+        setGames(gamesData);
+      } catch (error) {
+        console.error("Error fetching games:", error);
       }
     };
 
@@ -34,30 +38,15 @@ const CreationScenario = () => {
       idUserScenario: user.idUser,
     };
 
-    console.log("User ID: ", user?.Id);
-    console.log("Scenario Data: ", scenarioData);
-
     try {
-      const response = await fetch("http://localhost:8000/createScenario", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(scenarioData),
-      });
+      const result = await createScenario(scenarioData);
+      setFeedback("Scénario créé avec succès, vous allez être redirigé");
 
-      if (response.ok) {
-        const result = await response.json();
-        setFeedback("Scénario créé avec succès, vous allez être redirigé");
+      reset();
 
-        reset();
-
-        setTimeout(() => {
-          navigate(`/scenario/${result.idScenario}`);
-        }, 1250);
-      } else {
-        setFeedback("Erreur lors de la création du scénario");
-      }
+      setTimeout(() => {
+        navigate(`/scenario/${result.idScenario}`);
+      }, 1250);
     } catch (error) {
       console.error("Erreur de soumission:", error);
       setFeedback("Erreur de connexion au serveur.");
@@ -110,7 +99,7 @@ const CreationScenario = () => {
           <label>Contenu:</label>
           <textarea
             {...register("ContenuScenario", { required: true })}
-          ></textarea> 
+          ></textarea>
           {errors.Contenu && <span>Ce champ est requis</span>}
         </div>
         {feedback && <p className={styles.feedbackMessage}>{feedback}</p>}

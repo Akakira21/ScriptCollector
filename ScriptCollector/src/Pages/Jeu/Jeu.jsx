@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import styles from './Jeu.module.scss';
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import styles from "./Jeu.module.scss";
+
+import { getGameById } from "../../api/game";
+import { getScenariosByGameId } from "../../api/scenario";
 
 const Jeu = () => {
   const { gameId } = useParams();
@@ -8,72 +11,62 @@ const Jeu = () => {
   const [scenarios, setScenarios] = useState([]);
 
   useEffect(() => {
-    const fetchJeu = async () => {
+    const fetchJeuData = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/getGameById/${gameId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setJeu(data);
-        } else {
-          console.error("Erreur de récupération du jeu");
-        }
+        const gameData = await getGameById(gameId);
+        setJeu(gameData);
       } catch (error) {
-        console.error("Erreur récupération du jeu", error);
+        console.error("Erreur de récupération du jeu:", error);
       }
     };
 
-    const fetchScenarios = async () => {
+    const fetchScenariosData = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/getScenariosByGameId/${gameId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setScenarios(data);
-        } else {
-          console.error("Erreur de récupération des scénarios");
-        }
+        const scenariosData = await getScenariosByGameId(gameId);
+        setScenarios(scenariosData);
       } catch (error) {
-        console.error("Erreur récupération des scénarios", error);
+        console.error("Erreur de récupération des scénarios:", error);
       }
     };
 
-    fetchJeu();
-    fetchScenarios();
+    fetchJeuData();
+    fetchScenariosData();
   }, [gameId]);
 
   return (
     <div className={styles.Jeu}>
-  {jeu ? (
-    <>
-      <h1>{jeu.NomJeu}</h1>
-      <h2>{jeu.DescJeu}</h2>
-      <h3>Tags:</h3>
-      <ul className={styles.tags_list}>
-        {jeu.CategorieJeu.split(',')
-          .map(tag => tag.trim())
-          .filter(tag => tag.length > 0)
-          .map((tag, index) => (
-            <li key={index}>
-              <Link to={`/jeuxcategories/${tag.toLowerCase()}`}>
-                <div>{tag}</div>
-              </Link>
-            </li>
-        ))}
-      </ul>
-      <h3>Scénarios:</h3>
-      <ul className={styles.scenarios_list}>
-        {scenarios.map((scenario, index) => (
-          <li key={index}>
-            <Link to={`/scenario/${scenario.idScenario}`}>
-              <div>{scenario.NomScenario}</div>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </>
-  ) : (
-    <p>Chargement...</p>
-  )}
-</div>
+      {jeu ? (
+        <>
+          <h1>{jeu.NomJeu}</h1>
+          <h2>{jeu.DescJeu}</h2>
+          <h3>Tags:</h3>
+          <ul className={styles.tags_list}>
+            {jeu.CategorieJeu.split(",")
+              .map((tag) => tag.trim())
+              .filter((tag) => tag.length > 0)
+              .map((tag, index) => (
+                <li key={index}>
+                  <Link to={`/jeuxcategories/${tag.toLowerCase()}`}>
+                    <div>{tag}</div>
+                  </Link>
+                </li>
+              ))}
+          </ul>
+          <h3>Scénarios:</h3>
+          <ul className={styles.scenarios_list}>
+            {scenarios.map((scenario, index) => (
+              <li key={index}>
+                <Link to={`/scenario/${scenario.idScenario}`}>
+                  <div>{scenario.NomScenario}</div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p>Chargement...</p>
+      )}
+    </div>
   );
 };
 

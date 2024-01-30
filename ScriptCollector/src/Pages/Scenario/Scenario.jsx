@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { getScenarioById } from '../../api/scenario';
 import styles from './Scenario.module.scss';
 
 const Scenario = () => {
@@ -9,13 +10,8 @@ const Scenario = () => {
   useEffect(() => {
     const fetchScenario = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/getScenarioById/${scenarioId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setScenario(data);
-        } else {
-          console.error("Erreur de récupération du scénario");
-        }
+        const data = await getScenarioById(scenarioId);
+        setScenario(data);
       } catch (error) {
         console.error("Erreur récupération du scénario", error);
       }

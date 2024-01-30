@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import styles from './JeuxCategories.module.scss';
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import styles from "./JeuxCategories.module.scss";
+
+import { getAllGames, getGamesByTag } from "../../api/game";
 
 const JeuxCategories = () => {
   const { tag } = useParams();
@@ -9,25 +11,17 @@ const JeuxCategories = () => {
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        let url = tag === 'all' 
-                  ? `http://localhost:8000/getAllGames` 
-                  : `http://localhost:8000/getGamesByTag/${tag}`;
-  
-        const response = await fetch(url);
-        if (response.ok) {
-          const data = await response.json();
-          setGames(data);
-        } else {
-          console.error("Erreur de récupération des jeux");
-        }
+        const gamesData =
+          tag === "all" ? await getAllGames() : await getGamesByTag(tag);
+        setGames(gamesData);
       } catch (error) {
-        console.error("Erreur de récupération", error);
+        console.error("Erreur de récupération des jeux:", error);
       }
     };
-  
+
     fetchGames();
   }, [tag]);
-  
+
   return (
     <div className={styles.jeuxCategories}>
       <h1>Jeux par catégories</h1>

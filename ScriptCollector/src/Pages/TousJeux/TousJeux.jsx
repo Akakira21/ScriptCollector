@@ -2,30 +2,27 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./TousJeux.module.scss";
 
+import { getAllGames, getAllGameTags } from "../../api/game";
+
 const TousJeux = () => {
   const [games, setGames] = useState([]);
   const [tags, setTags] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchGames = async () => {
-      const response = await fetch("http://localhost:8000/getAllGames");
-      if (response.ok) {
-        const data = await response.json();
-        setGames(data.sort((a, b) => a.NomJeu.localeCompare(b.NomJeu)));
+    const fetchData = async () => {
+      try {
+        const gamesData = await getAllGames();
+        setGames(gamesData.sort((a, b) => a.NomJeu.localeCompare(b.NomJeu)));
+
+        const tagsData = await getAllGameTags();
+        setTags(tagsData.sort((a, b) => a.localeCompare(b)));
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
     };
 
-    const fetchGameTags = async () => {
-      const response = await fetch("http://localhost:8000/getAllGameTags");
-      if (response.ok) {
-        const data = await response.json();
-        setTags(data.sort((a, b) => a.localeCompare(b)));
-      }
-    };
-
-    fetchGames();
-    fetchGameTags();
+    fetchData();
   }, []);
 
   const handleTagChange = (e) => {

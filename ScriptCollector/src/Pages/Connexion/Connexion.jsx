@@ -1,73 +1,37 @@
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from 'react';
 import styles from "./Connexion.module.scss";
 import { useForm } from "react-hook-form";
 import { useAuth } from '../../Components/AuthContext/AuthContext';
-
+import { getUserByEmail } from '../../api/user';
 
 function Connexion() {
-
   const [feedback, setFeedback] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-    const defaultValues = {
-        email: "",
-        password: "",
+  const submit = async (values) => {
+    try {
+      const user = {
+        email: values.email,
+        password: values.password,
       };
 
-    const {
-        register,
-        handleSubmit,
-        reset,
-        formState: { errors },
-      } = useForm({
-        defaultValues,
-        mode: "onChange",
-      });
-
-
-      async function submit(values) {
-        let user = {
-          email: values.email,
-          password: values.password,
-        };
+      const res = await getUserByEmail(user);
       
-        try {
-          const response = await fetch("http://localhost:8000/getUserByEmail", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(user),
-          });
-      
-          if (response.ok) {
-            const res = await response.json();
-            console.log(res);
-            if (res.message === "erreur") {
-              setFeedback("Identifiant ou mot de passe incorrecte");
-            } else {
-              login(res.user);
-              console.log(res.user);
-              setFeedback("Connexion réussie");
-              navigate('/');
-            }           
-          } else if (response.status === 401) {
-            setFeedback("Identifiant ou mot de passe incorrecte");
-          } else if (response.status === 404) {
-            setFeedback("Utilisateur non trouvé");
-          } else if (!response.ok) {
-            setFeedback("Une erreur s'est produite lors de la connexion.");
-          } else {
-            setFeedback("Une erreur s'est produite lors de la connexion.");
-          }
-        } catch (error) {
-          console.error(error);
-          setFeedback("Erreur de connexion au serveur.");
-        }
+      if (res.message === "Erreur") {
+        setFeedback("Identifiant ou mot de passe incorrecte");
+      } else {
+        login(res.user);
+        setFeedback("Connexion réussie");
+        navigate('/');
       }
-      
+    } catch (error) {
+      console.error('Error during login:', error);
+      setFeedback("Une erreur s'est produite lors de la connexion.");
+    }
+  };
     return (
         <div className={styles.connexionMain}>
             <form onSubmit={handleSubmit(submit)}>
