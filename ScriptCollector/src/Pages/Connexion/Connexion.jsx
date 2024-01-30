@@ -18,7 +18,7 @@ function Connexion() {
         password: values.password,
       };
 
-      const res = await getUserByEmail(user);
+      const res = await getUserByEmail(user); 
       
       if (res.message === "Erreur") {
         setFeedback("Identifiant ou mot de passe incorrecte");

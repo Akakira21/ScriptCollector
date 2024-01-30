@@ -12,9 +12,9 @@ export const addUser = async (userData) => {
     }
 };
 
-export const getUserByEmail = async (email, password) => {
+export const getUserByEmail = async (user) => {
     try {
-        const response = await axios.post(`${API_URL}/getUserByEmail`, { email, password });
+        const response = await axios.post(`${API_URL}/getUserByEmail`, { user });
         return response.data;
     } catch (error) {
         console.error('Error fetching user by email:', error);

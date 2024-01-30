@@ -50,7 +50,9 @@ exports.getUserByEmail = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password } = req.body;
+    console.log(req.body.user);
+
+    const { email, password } = req.body.user;
     const sqlGet = "SELECT * FROM users WHERE email = ?";
 
     db.query(sqlGet, [email], async (err, result) => {
